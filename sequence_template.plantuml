@@ -1,0 +1,26 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+  entity "Cognitive Contract" as cognitiveContract
+end box
+
+box "Data"
+  actor "Data Provider" as provider
+  participant "Provider App" as app
+  entity "Data Entity Contract" as dataContract
+  database "IPFS" as ipfs
+end box
+
+box "Pandora Network"
+  control "Worker Nodes" as workers
+  control "Validating Nodes" as validators
+  control "Arbitor Nodes" as arbitors
+  control "Governing Nodes" as governors
+end box
+
+box "Pandora Boxchain"
+  entity "Main Contract" as theContract
+  entity "Worker Contract" as workerContract
+end box
+@enduml
