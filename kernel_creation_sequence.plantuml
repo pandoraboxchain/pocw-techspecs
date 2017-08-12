@@ -1,10 +1,16 @@
 @startuml
-actor "Kernel author" as author
-participant "Client app" as app
+box "Client" #white
+  actor "Kernel author" as author
+  participant "Client app" as app
+end box
+
 database IPFS as ipfs
-participant "Worker node" as worker
-control "Pandora contract" as contract
-collections "Pandora network" as network
+
+box "Pandora Boxchain" #white
+  participant "Worker node" as worker
+  control "Pandora contract" as contract
+  collections "Pandora network" as network
+end box
 
 == Kernel contract creation ==
 
@@ -38,8 +44,8 @@ end ref
 
 activate contract
 create control "Kernel contract" as kernel
-contract->kernel: new
-hnote over app: Waiting
+contract-->kernel: new
+... Mining transaction in Ethereum ...
 contract-->>app: Kernel contract address
 deactivate contract
 
@@ -48,9 +54,9 @@ deactivate contract
 app->worker: signContract()
 activate worker
 par
-  worker->>ipfs: download files
+  worker->>ipfs: download
   activate worker #gray
-  hnote over worker: waiting
+... downloading files ...
   ipfs-->>worker
   deactivate worker
 else
@@ -58,18 +64,22 @@ else
 else
   worker->>kernel: getContractDetails()
 end
+
+'activate worker #grey
+worker->worker: deployNetwork
 worker->worker: validate
 note right of worker
   Integrity and 
   consistency 
   validations
 end note
+'deactivate worker
 
 alt Validation passed well
   worker->>contract: signKernelContract
-  contract-->>worker: <<transaction mined>>
+... Mining transaction in Ethereum ...
   contract->>kernel: activateContract
-  contract-->>worker: <<transaction mined>>
+... Mining transaction in Ethereum ...
   contract->>network: <<event>> newActiveKernel
   deactivate contract
   worker-->app: success
