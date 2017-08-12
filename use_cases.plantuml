@@ -1,0 +1,44 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+title Pandora Boxchain Use Cases Diagram
+
+actor :Kernel Provider: as KP
+actor :Dataset Provider: as DP
+actor :Client: as C
+actor :Working Node: as WN
+actor :Validating Node: as VN
+
+KP <|-- C : may be
+DP <|-- C : may be
+WN <|-- VN : high reputation
+
+rectangle "Data Structure Initialization" {
+  usecase (Kernel Creation) as newKernel
+  usecase (Dataset Creation) as newDataset
+  usecase (Data Arbitration) as dataArbitration
+
+  KP -l- (newKernel): provides data
+  VN -- (newKernel): validates data
+
+  DP -- (newDataset): provides data
+  VN -- (newDataset): validates data
+
+  newKernel .> dataArbitration: extends
+  newDataset .> dataArbitration: extends
+  VN -- (dataArbitration): revalidate
+}
+
+rectangle "Cognitive Computing" {
+  usecase (Cognitive Computing) as cognition
+  usecase (Cognitive Arbitration) as cognitiveArbitration
+
+  C -- (cognition): initialize work
+  cognition .> cognitiveArbitration: extends
+  WN -- (cognition): performs cognitive computations
+  VN -- (cognition): validates computation results
+  WN -- (cognitiveArbitration): initialize
+  VN -- (cognitiveArbitration): arbitrate
+}
+@enduml
