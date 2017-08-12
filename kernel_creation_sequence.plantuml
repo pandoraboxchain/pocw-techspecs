@@ -1,0 +1,82 @@
+@startuml
+actor "Kernel author" as author
+participant "Client app" as app
+database IPFS as ipfs
+participant "Worker node" as worker
+control "Pandora contract" as contract
+collections "Pandora network" as network
+
+== Kernel contract creation ==
+
+activate app
+app->ipfs: upload
+note right of app
+  JSON neural 
+  network model
+end note
+ipfs-->app: file address
+
+app->ipfs: upload
+note right of app
+  HDF5 weights of
+  neural network
+end note
+ipfs-->app: file address
+
+app->>contract: createKernelContract()
+
+ref over app, contract
+  - IPFS file address for neural network model
+  - IPFS file address for neural network weights
+  - PAN deposit
+  - Used NN framework, version & supported hardware
+  - Computation complexity data
+  - Input data matrix dimension
+  - Marketing information for dApp market
+  - Price for usage (in PAN tokens)
+end ref
+
+activate contract
+create control "Kernel contract" as kernel
+contract->kernel: new
+hnote over app: Waiting
+contract-->>app: Kernel contract address
+deactivate contract
+
+== Kernel contract activation ==
+
+app->worker: signContract()
+activate worker
+par
+  worker->>ipfs: download files
+  activate worker #gray
+  hnote over worker: waiting
+  ipfs-->>worker
+  deactivate worker
+else
+  worker->>contract: checkKernelContract()
+else
+  worker->>kernel: getContractDetails()
+end
+worker->worker: validate
+note right of worker
+  Integrity and 
+  consistency 
+  validations
+end note
+
+alt Validation passed well
+  worker->>contract: signKernelContract
+  contract-->>worker: <<transaction mined>>
+  contract->>kernel: activateContract
+  contract-->>worker: <<transaction mined>>
+  contract->>network: <<event>> newActiveKernel
+  deactivate contract
+  worker-->app: success
+else Validation failed
+  worker-->app: error(code)
+end
+
+deactivate worker
+deactivate app
+@enduml
