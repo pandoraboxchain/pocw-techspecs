@@ -1,0 +1,40 @@
+@startuml
+'left to right direction
+skinparam packageStyle rectangle
+
+title Pandora Boxchain Data Entities Use Cases
+
+actor :Generic Provider: as GP
+actor :Kernel Provider: as KP
+actor :Dataset Provider: as DP
+actor :Validating Node Level 1: as VN1
+actor :Validating Node Level 2: as VN2
+
+GP --|> KP
+GP --|> DP
+
+VN2 --l--|> VN1: higher reputation
+
+rectangle "Data Entities" {
+  usecase (Data Entity Creation) as newData
+  usecase (Kernel Creation) as newKernel
+  usecase (Dataset Creation) as newDataset
+  usecase (Data Arbitrage) as dataArbitrage
+  usecase (Price Update) as priceUpdate
+
+  newData ..> newKernel: include
+  newData ..> newDataset: include
+  priceUpdate .> newData: extend
+
+  GP --- (priceUpdate): updates price
+  KP -- (newKernel): provides data
+  DP -- (newDataset): provides data
+
+  (newKernel) --- VN1: validates data
+  (newDataset) --- VN1: validates data
+
+  newKernel ..> dataArbitrage: extend
+  newDataset ..> dataArbitrage: extend
+  (dataArbitrage) -- VN2: revalidates
+}
+@enduml
