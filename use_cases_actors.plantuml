@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+title Pandora Boxchain Actors Diagram
+
+actor :Kernel Provider: as KP
+actor :Dataset Provider: as DP
+actor :Client: as C
+actor :Working Node: as WN
+actor :Validating Node Level 1: as VN1
+actor :Validating Node Level 2: as VN2
+actor :Govering Node: as GN
+
+WN <|-- VN1: high stake
+VN1 <|-- VN2: high reputation
+VN2 <|-- GN: highest reputation
+
+KP <|-l-|> DP: may be
+KP <|-- C: may be
+DP <|-- C: may be
+@enduml
