@@ -13,10 +13,11 @@ box "Data"
 end box
 
 box "Pandora Network"
-  control "Worker Nodes" as workers
-  control "Validating Nodes" as validators
-  control "Arbitor Nodes" as arbitors
-  control "Governing Nodes" as governors
+  collections "Worker Nodes" as workers
+  collections "Validating Nodes" as validators
+  collections "Arbitor Nodes" as arbitors
+  collections "Governing Nodes" as governors
+  control "Keras/TensorFlow" as nn
 end box
 
 box "Pandora Boxchain"
