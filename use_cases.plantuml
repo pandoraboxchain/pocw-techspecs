@@ -15,19 +15,30 @@ DP <|-- C : may be
 WN <|-- VN : high reputation
 
 rectangle "Data Structure Initialization" {
+  usecase (Data Creation) as newData
   usecase (Kernel Creation) as newKernel
   usecase (Dataset Creation) as newDataset
   usecase (Data Arbitration) as dataArbitration
+  usecase (Price Update) as priceUpdate
+
+  newData .> newKernel: include
+  newData .> newDataset: include
+  priceUpdate .> newData: extend
 
   KP -l- (newKernel): provides data
   VN -- (newKernel): validates data
+  KP -- (priceUpdate): updates price
 
   DP -- (newDataset): provides data
   VN -- (newDataset): validates data
+  DP -- (priceUpdate): updates price
 
-  newKernel .> dataArbitration: extends
-  newDataset .> dataArbitration: extends
+  newKernel .> dataArbitration: extend
+  newDataset .> dataArbitration: extend
   VN -- (dataArbitration): revalidate
+
+  newData -[hidden]- newKernel
+  newData -[hidden]- newDataset
 }
 
 rectangle "Cognitive Computing" {
