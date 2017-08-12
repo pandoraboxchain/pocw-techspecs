@@ -1,0 +1,34 @@
+@startuml
+skinparam packageStyle rectangle
+
+title Pandora Boxchain Cognitive Work Use Cases
+
+actor :Generic Provider: as GP
+actor :Kernel Provider: as KP
+actor :Dataset Provider: as DP
+actor :Client: as C
+actor :Working Node: as WN
+actor :Validating Node Level 1: as VN1
+actor :Validating Node Level 2: as VN2
+actor :Data Entities Validators: as DEV
+
+KP <|-- GP: can be
+DP <|-- GP: can be
+
+VN1 <|- VN2: higher reputation
+DEV -|> VN1: "subset of VN1\nfrom data entities\nuse cases"
+
+rectangle "Cognitive Computing" {
+  usecase (Cognitive Computing) as cognition
+  usecase (Cognitive Arbitration) as cognitiveArbitration
+
+  cognition .l.> cognitiveArbitration: extends
+  (cognition) -- C: "init &\npayes\nfor work"
+  WN -- (cognition): "performs\ncognitive\ncomputations\n& mines"
+  WN -- (cognitiveArbitration): initialize
+  VN1 -- (cognition): "validates\ncomputation\nresults"
+  VN2 -- (cognitiveArbitration): "arbitrates &\n get rewards\nor penalties"
+  (cognition) -- DEV: "gets % of\npaiments\nto Providers"
+  (cognition) --l-- GP: got paid
+}
+@enduml
