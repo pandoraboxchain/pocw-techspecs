@@ -1,0 +1,51 @@
+@startuml
+(*) --> "Initial state"
+
+partition "Create Contract" {
+  -->[data package] "pandoraContract.createDataEntry()"
+  --> "New DataEntry Contract"
+}
+
+partition "Validate Contract" {
+  --> [contract address] "Worker Node: validateDataEntry()"
+  --> "takeDeposit"
+  --> "requestContractDetails"
+  if "contract exists" then 
+    -->[yes] "validateContractDetails"
+    if "details are valid" then
+      -->[yes] "downloadKernel"
+      if "files found" then
+        -->[yes] "validateFiles"
+        if "file formats are correct"
+          -->[yes] "validateKernelModel"
+          if "model is correct"
+            -->[yes] "validateKernelParameters"
+            if "parameters are right"
+              -->[yes] "pandoraContract.activateDataEntry"
+              -->"DataEntryContract.sign"
+              -->"DataEntryContract.setActive"
+              -->"return success code"
+            else
+              -->[no] === Error ===
+            endif
+          else
+            -->[no] === Error ===
+          endif
+        else
+          -->[no] === Error ===
+        endif
+      else
+        -->[no] === Error ===
+      endif
+    else
+      -->[no] === Error ===
+    endif
+  else
+    -->[no] === Error ===
+  endif
+
+  === Error === --> "pandoraContract.destroyDataEntry"
+  --> "DataEntryContract.destroy"
+  --> "return failure code"
+}
+@enduml
