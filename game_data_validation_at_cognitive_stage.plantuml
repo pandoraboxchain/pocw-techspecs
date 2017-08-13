@@ -1,0 +1,48 @@
+@startuml
+start
+
+if (Data Provided submitted\ncorrect data) then (yes)
+  if (None of workers\nreported problems) then (yes)
+    :pay to all 
+    parties involved;
+
+    stop
+  else (no)
+    :assign validators,
+    perform usual validation
+    that will confirm
+    data correctness;
+    
+    :put penalty on
+    wrong reporters;
+
+    stop
+  endif
+else (no)
+  if (All workers\nreported problem) then (yes)
+    :put penalty on
+    data providers;
+
+    :pay workers from
+    that penalty;
+
+    stop
+  else (no)
+    :assign validators,
+    perform usual validation
+    that will confirm
+    data incorrectness;
+
+    :put penalty on
+    wrong reporters;
+    
+    :put penalty on
+    data providers,
+
+    :pay fair workers
+    from that penalties;
+
+    stop
+  endif
+endif
+@enduml
