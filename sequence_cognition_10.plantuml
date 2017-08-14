@@ -63,48 +63,34 @@ deactivate pandora
 dapp -->> pandora: startCognition
 deactivate dapp
 activate pandora
-ref over pandora: lottery
-pandora -> pandora: selectWorkers
-pandora -->> cognition: initWithWorkers
+
+loop until all batches accepted by workers, but < N thimes
+  |||
+  ref over pandora: lottery
+  pandora -> pandora: selectWorkers
+  pandora -->> cognition: initWithWorkers
 ... mining transaction ...
-pandora -->> workers: << newJob >> event
-deactivate pandora
+  pandora -->> workers: << newJob >> event
+  deactivate pandora
 
 == Main Cognitive Work ==
+  activate workers
 
-activate workers
-workers -> cognition: readData
-cognition --> workers: << cognitive job info >>
-workers ->> ipfs: download
-... downloading ...
-ipfs -->> workers: << files >>
-workers -> workers: integrityCheck
-workers -> workers: consistencyCheck
-workers -> nn: loadNetwork
-activate nn
-workers -> nn: getDetails
-workers ->> pandora: jobAccepted
+  alt Active workers
+    |||
+    ref over pandora, nn: Cognition
+    |||
+  else Inactive workers (= no response within some timeframe)
+    group repeat
+    end
+  end
+end
+
+== Sufficient amount of active workers not found ==
+
 activate pandora
-pandora -> pandora: updateWorkers
-'... mining transaction ...
+pandora -->> dapp: << contractFailed >> event
+pandora -->> dapp: returnDeposit
 deactivate pandora
-workers ->> nn: compute
-... computing ...
-nn -->> workers: << results >>
-deactivate nn
-workers ->> ipfs: upload
-... uploading ...
-ipfs -->> workers: << addresses >>
-workers -> cognition: acceptResults
-deactivate workers
-activate cognition
-
-== Validation ==
-
-cognition --> pandora: validateResults
-deactivate cognition
-activate pandora
-
-ref over pandora, validators: Validation
-deactivate pandora
+|||
 @enduml
