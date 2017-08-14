@@ -34,7 +34,7 @@ activate dapp
 dapp ->> ipfs: donwload
 activate ipfs
 ... donwloading ...
-ipfs -->> dapp: << files >>
+ipfs -->> dapp: < files >
 deactivate ipfs
 
 dapp -> dapp: integrityCheck
@@ -43,7 +43,7 @@ dapp -> dapp: batchSplit
 dapp ->> ipfs: uploadBatches
 activate ipfs
 ... uploading ...
-ipfs -->> dapp: << addresses >>
+ipfs -->> dapp: < addresses >
 deactivate ipfs
 
 == Cognitive Order ==
@@ -54,10 +54,10 @@ create entity "Cognition Contract" as cognition
 pandora ->> cognition: new
 activate cognition
 ... mining transaction ...
-cognition -->> pandora: << contract address >>
+cognition -->> pandora: < contract address >
 deactivate cognition
 
-pandora -->> dapp: << contract address >>
+pandora -->> dapp: < contract address >
 deactivate pandora
 
 dapp -->> pandora: startCognition
@@ -70,14 +70,15 @@ loop until all batches are accepted by workers, with N repeat limit
   pandora -> pandora: selectWorkers
   pandora -->> cognition: initWithWorkers
 ... mining transaction ...
-  pandora -->> workers: << newJob >> event
+  pandora -[#blue]->> workers: newCognitiveJob
   deactivate pandora
   activate workers
   alt Active workers
     |||
     ref over pandora, nn: Cognition
     |||
-  else Inactive workers (= no response within some timeframe)
+  else Inactive workers (= decline response or no response within some timeframe)
+    pandora -[#red]->x workers: penalty
     group repeat
     end
   end
@@ -85,8 +86,8 @@ end
 
 group if [sufficient amount of active workers is not found after N repeats]
   activate pandora
-  pandora -->> dapp: << contractFailed >> event
-  pandora -->>o dapp: returnDeposit
+  pandora -[#blue]->> dapp: contractFailed
+  pandora -[#green]->o dapp: returnDeposit
   deactivate pandora
 end
 |||
