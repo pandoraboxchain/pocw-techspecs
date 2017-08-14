@@ -1,0 +1,23 @@
+@startuml
+|Pandora Contract|
+
+start
+
+|Pandora Contract|
+partition CheckInputs {
+  if (kernel.input_dim = dataset.dim) then (yes)
+    if (client.deposit = kernel.job_complexity etc) then (yes)
+    else (no)
+      :error#2>
+      end
+    endif
+  else (no)
+    :error#1>
+    end
+  endif
+}
+
+partition FindWorkers {
+  :lottery|
+}
+@enduml
