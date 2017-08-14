@@ -90,7 +90,7 @@ end
 
 activate pandora
 pandora -->> dapp: << contractFailed >> event
-pandora -->> dapp: returnDeposit
+pandora -->>o dapp: returnDeposit
 deactivate pandora
 |||
 @enduml
