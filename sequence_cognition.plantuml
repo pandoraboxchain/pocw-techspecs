@@ -1,0 +1,111 @@
+@startuml
+box "Client"
+  actor "Data Provider" as provider
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
+
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Worker Nodes" as workers
+  control "Keras/TensorFlow" as nn
+  collections "Validating Nodes" as validators
+  collections "Arbitor Nodes" as arbitors
+end box
+
+== Client selects datasets and kernels ==
+
+ref over client, dapp, pandora: Browsing market
+client <<-->> dapp
+dapp <<-->> pandora
+ref over client
+  Dataset and 
+  kernel selected
+end ref
+
+|||
+
+== Preprocessing Cognition Order ==
+
+client -> dapp: createCognitiveWork
+activate dapp
+dapp ->> ipfs: donwload
+activate ipfs
+... donwloading ...
+ipfs -->> dapp: << files >>
+deactivate ipfs
+
+dapp -> dapp: integrityCheck
+dapp -> dapp: consistencyCheck
+dapp -> dapp: batchSplit
+dapp ->> ipfs: uploadBatches
+activate ipfs
+... uploading ...
+ipfs -->> dapp: << addresses >>
+deactivate ipfs
+
+== Cognitive Order ==
+
+dapp ->> pandora: orderCognition
+activate pandora
+create entity "Cognition Contract" as cognition
+pandora ->> cognition: new
+activate cognition
+... mining transaction ...
+cognition -->> pandora: << contract address >>
+deactivate cognition
+
+pandora -->> dapp: << contract address >>
+deactivate pandora
+
+dapp -->> pandora: startCognition
+deactivate dapp
+activate pandora
+ref over pandora: lottery
+pandora -> pandora: selectWorkers
+pandora -->> cognition: initWithWorkers
+... mining transaction ...
+pandora -->> workers: << newJob >> event
+deactivate pandora
+
+== Main Cognitive Work ==
+
+activate workers
+workers -> cognition: readData
+cognition --> workers: << cognitive job info >>
+workers ->> ipfs: download
+... downloading ...
+ipfs -->> workers: << files >>
+workers -> workers: integrityCheck
+workers -> workers: consistencyCheck
+workers -> nn: loadNetwork
+activate nn
+workers -> nn: getDetails
+workers ->> pandora: jobAccepted
+activate pandora
+pandora -> pandora: updateWorkers
+'... mining transaction ...
+deactivate pandora
+workers ->> nn: compute
+... computing ...
+nn -->> workers: << results >>
+deactivate nn
+workers ->> ipfs: upload
+... uploading ...
+ipfs -->> workers: << addresses >>
+workers -> cognition: acceptResults
+deactivate workers
+activate cognition
+
+== Validation ==
+
+cognition --> pandora: validateResults
+deactivate cognition
+activate pandora
+
+deactivate dapp
+@enduml
