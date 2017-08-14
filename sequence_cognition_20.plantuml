@@ -17,89 +17,97 @@ end box
 
 entity "Cognition Contract" as cognition
 
-|||
-ref over client, cognition: Continuation of part 1
-
 == Validation ==
 
 cognition -> pandora: validateResults
 deactivate cognition
 activate pandora
 
-pandora -->> validators: << validate >> event
-deactivate pandora
-
-alt Validator active
-  activate validators
-  validators -> cognition: readData
-  cognition --> validators: << cognitive job info >>
-  validators ->> ipfs: download
-... downloading ...
-  ipfs -->> validators: << files >>
-  validators -> nn: loadNetwork
-  activate nn
-  validators -> nn: getDetails
-  activate pandora
-  alt Validator accepts job
-    validators ->> pandora: jobAccepted(timeEstimation)
-  else Validator declined job
-    validators ->> pandora: jobDeclined
-    pandora ->> pandora: << try with other validators >>
-  end
-  pandora -> pandora: updateValidators
-'... mining transaction ...
-else Validator timeout
-  pandora ->> pandora: << try with other validators >>
-end
-deactivate validators
+loop until validators found, with reducing reputation limit, but < N times
+  |||
+  ref over pandora: lottery
+  pandora -> pandora: selectValidators
+  pandora -->> cognition: initWithValidators
 ... mining transaction ...
-pandora ->> validators: << startValidation >> event
-activate validators
-deactivate pandora
-
-par
-  validators ->> nn: compute
-  ... computing ...
-  nn -->> validators: << results >>
-  deactivate nn
-else
-  ipfs <<- validators: download
-  activate ipfs
-  note right: downloading\ncomputation\nresults
-... downloading ...
-  ipfs -->> validators: << files >>
-  deactivate ipfs
-end
-validators -> validators: compareResults
-validators ->> cognition: validationResults
-deactivate validators
-
-cognition -> pandora: validationResults
-
-alt Validation didn't confirmed calculations
-  |||
-  ref over pandora, workers, validators: Arbitration
-  |||
-else Validator answer timeout
-  |||
-  pandora -->> validators: << updateTimeEstimation >> event
-  activate pandora
-  alt Validator responses
-   validators ->> pandora: updateTimeEstimation
-  else Validator does not response
-    pandora ->> pandora: << try with other validators >>
-  end
+  pandora -->> validators: << newValidationJob >> event
   deactivate pandora
-  |||
-else Validation confirmed original calculations
-== Payouts ==
-  pandora ->> cognition: makePayments
-  cognition ->>o pandora: mine
-  cognition ->>o pandora: pay(workers)
-  cognition ->>o pandora: pay(validators)
-  cognition ->>o pandora: pay(dataProvider)
-  cognition ->>o pandora: pay(kernelProvider)
-  cognition ->>o pandora: pay(researchWork)
-... mine transactions ...
+
+  alt Validator timeout
+    group repeat
+    end
+  else Validator active
+    activate validators
+    validators -> cognition: readData
+    cognition --> validators: << cognitive job info >>
+    validators ->> ipfs: download
+... downloading ...
+    ipfs -->> validators: << files >>
+    validators -> nn: loadNetwork
+    activate nn
+    validators -> nn: getDetails
+    activate pandora
+    alt Validator accepts job
+      validators ->> pandora: jobAccepted(timeEstimation)
+    else Validator declined job
+      validators ->> pandora: jobDeclined
+      group repeat
+      end
+    end
+    pandora -> pandora: updateValidators
+
+    deactivate validators
+... mining transaction ...
+    pandora ->> validators: << startValidation >> event
+    activate validators
+    deactivate pandora
+
+    par
+      validators ->> nn: compute
+      ... computing ...
+      nn -->> validators: << results >>
+      deactivate nn
+    else
+      ipfs <<- validators: download
+      activate ipfs
+      note right: downloading\ncomputation\nresults
+      ... downloading ...
+      ipfs -->> validators: << files >>
+      deactivate ipfs
+    end
+    validators -> validators: compareResults
+    validators ->> cognition: validationResults
+    deactivate validators
+
+    cognition -> pandora: validationResults
+
+    alt Validation didn't confirmed calculations
+      ref over pandora, workers, validators: Arbitrage
+    else Validator answer timeout
+      pandora -->> validators: << updateTimeEstimation >> event
+      activate pandora
+      alt Validator responses
+        validators ->> pandora: updateTimeEstimation
+      else Validator does not response
+        group repeat
+        end
+      end
+      deactivate pandora
+    else Validation confirmed original calculations
+      == Payouts ==
+      pandora ->>o pandora: makePaymentsAndMine
+      'cognition ->>o pandora: mine
+      'cognition ->>o pandora: pay(workers)
+      'cognition ->>o pandora: pay(validators)
+      'cognition ->>o pandora: pay(dataProvider)
+      'cognition ->>o pandora: pay(kernelProvider)
+      'cognition ->>o pandora: pay(researchWork)
+      ... mine transactions ...
+    end
+  end
+end
+group if [Not all validators found / worked]
+  pandora -->> dapp: << jobCompleted\nPartialValidation >> event
+  pandora -->>o client: partialPayout
+  pandroa -->>o pandora: makePayments\n(exceptValidators)
 end
 @enduml
