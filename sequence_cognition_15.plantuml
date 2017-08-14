@@ -1,0 +1,52 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
+
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Worker Nodes" as workers
+  control "Keras/TensorFlow" as nn
+  collections "Validating Nodes" as validators
+end box
+
+entity "Cognition Contract" as cognition
+
+== Cognition ==
+
+activate workers
+workers -> cognition: readData
+cognition --> workers: << cognitive job info >>
+workers ->> ipfs: download
+... downloading ...
+ipfs -->> workers: << files >>
+workers -> workers: integrityCheck
+workers -> workers: consistencyCheck
+workers -> nn: loadNetwork
+activate nn
+workers -> nn: getDetails
+activate pandora
+alt Worker declines job
+  workers ->> pandora: jobDeclined
+  pandora ->> pandora: << try with other workers >>
+else Worker accepts job
+  workers ->> pandora: jobAccepted(timeEstimation)
+  pandora -> pandora: updateWorkers
+  deactivate pandora
+  workers ->> nn: compute
+... computing ...
+  nn -->> workers: << results >>
+  deactivate nn
+  workers ->> ipfs: upload
+... uploading ...
+  ipfs -->> workers: << addresses >>
+  workers -> cognition: acceptResults
+  deactivate workers
+  activate cognition
+end
+@enduml
