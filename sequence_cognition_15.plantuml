@@ -27,26 +27,40 @@ workers ->> ipfs: download
 ipfs -->> workers: << files >>
 workers -> workers: integrityCheck
 workers -> workers: consistencyCheck
-workers -> nn: loadNetwork
-activate nn
-workers -> nn: getDetails
-activate pandora
-alt Worker declines job
-  workers ->> pandora: jobDeclined
-  pandora ->> pandora: << try with other workers >>
-else Worker accepts job
-  workers ->> pandora: jobAccepted(timeEstimation)
-  pandora -> pandora: updateWorkers
-  deactivate pandora
-  workers ->> nn: compute
-... computing ...
-  nn -->> workers: << results >>
-  deactivate nn
-  workers ->> ipfs: upload
-... uploading ...
-  ipfs -->> workers: << addresses >>
-  workers -> cognition: acceptResults
-  deactivate workers
-  activate cognition
+alt Data are incorrect
+  workers ->> cognition: incorrectData
+  cognition ->> pandora: arbitrateInvalidData
+  ref over pandora, workers, validators: Data artibitrage
+  |||
+else Data are correct
+  workers -> nn: loadNetwork
+  activate nn
+  workers -> nn: getDetails
+  activate pandora
+  alt Worker declines job
+    workers ->> pandora: jobDeclined
+    group repeat workers_loop
+    end
+    |||
+  else Worker accepts job
+    workers ->> pandora: jobAccepted(timeEstimation)
+    pandora -> pandora: updateWorkers
+    deactivate pandora
+    workers ->> nn: compute
+  ... computing ...
+    nn -->> workers: << results >>
+    deactivate nn
+    workers ->> ipfs: upload
+  ... uploading ...
+    ipfs -->> workers: << addresses >>
+    workers -> cognition: acceptResults
+    deactivate workers
+    activate cognition
+  end
 end
+
+== Validation ==
+
+ref over pandora, cognition: Validation
+|||
 @enduml
