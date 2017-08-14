@@ -1,10 +1,11 @@
 @startuml
 |Pandora Contract|
-
-start
+|Workers|
 
 |Pandora Contract|
-partition CheckInputs {
+start
+
+partition checkInputs {
   if (kernel.input_dim = dataset.dim) then (yes)
     if (client.deposit = kernel.job_complexity etc) then (yes)
     else (no)
@@ -17,7 +18,63 @@ partition CheckInputs {
   endif
 }
 
-partition FindWorkers {
-  :lottery|
+partition startCognition {
+  repeat
+
+    :lottery|
+    :cognitiveJobCreated/
+    fork
+      :waitingForResponses;
+      detach
+    fork again
+      |Workers|
+      start
+      if (busy) then (yes)
+        :busy>
+      else (no)
+        :checkingData;
+        if (data is valid) then (no)
+          :invalidData>
+        else (yes)
+          :ready>
+        endif
+      endif
+
+    end fork
+
+    |Pandora Contract|
+    start
+    fork
+      :workerResponse<
+    fork again
+      :workerResponse<
+    fork again
+      :...<
+    end fork
+
+    if (∃ response = invalidData) then (yes)
+      :Invalid data arbitrage|
+      end
+    elseif (∃ response = busy) then (yes)
+      :penaltyToWorker#1]
+    elseif (noTries > N) then (yes)
+      :paybackClient(noValidationDeposit)]
+      :cognitiveJobCancelled(reason#1)/
+      end
+    else (timeout)
+      :penaltyToWorker#2]
+    endif
+  repeat while (∀ responses = accept) is (no)
+}
+
+partition cognitiveMining {
+  :cognitiveJobStarted/
+  fork
+    :waitingForResponses;
+    detach
+  fork again
+    |Workers|
+    start
+  end fork
 }
 @enduml
