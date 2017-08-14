@@ -1,6 +1,5 @@
 @startuml
 box "Client"
-  actor "Data Provider" as provider
   actor "Client" as client
   participant "Client dApp" as dapp
 end box
@@ -14,7 +13,6 @@ box "Workers"
   collections "Worker Nodes" as workers
   control "Keras/TensorFlow" as nn
   collections "Validating Nodes" as validators
-  collections "Arbitor Nodes" as arbitors
 end box
 
 == Client selects datasets and kernels ==
@@ -107,27 +105,6 @@ cognition --> pandora: validateResults
 deactivate cognition
 activate pandora
 
-pandora -->> validators: << validate >> event
-activate validators
-validators -> cognition: readData
-cognition --> validators: << cognitive job info >>
-validators ->> ipfs: download
-... downloading ...
-ipfs -->> validators: << files >>
-validators -> nn: loadNetwork
-activate nn
-validators -> nn: getDetails
-validators ->> pandora: jobAccepted
-activate pandora
-pandora -> pandora: updateValidators
-'... mining transaction ...
+ref over pandora, validators: Validation
 deactivate pandora
-validators ->> nn: compute
-... computing ...
-nn -->> validators: << results >>
-deactivate nn
-validators -> cognition: validationResults
-deactivate validators
-
-deactivate dapp
 @enduml
