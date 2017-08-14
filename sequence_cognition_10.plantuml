@@ -64,7 +64,7 @@ dapp -->> pandora: startCognition
 deactivate dapp
 activate pandora
 
-loop until all batches accepted by workers, but < N thimes
+loop until all batches are accepted by workers, with N repeat limit
   |||
   ref over pandora: lottery
   pandora -> pandora: selectWorkers
@@ -86,11 +86,11 @@ loop until all batches accepted by workers, but < N thimes
   end
 end
 
-== Sufficient amount of active workers not found ==
-
-activate pandora
-pandora -->> dapp: << contractFailed >> event
-pandora -->>o dapp: returnDeposit
-deactivate pandora
+group if [sufficient amount of active workers is not found after N repeats]
+  activate pandora
+  pandora -->> dapp: << contractFailed >> event
+  pandora -->>o dapp: returnDeposit
+  deactivate pandora
+end
 |||
 @enduml
