@@ -32,15 +32,18 @@ partition startCognition {
       if (busy) then (yes)
         :busy>
       else (no)
-        :checkingData;
-        if (data is valid) then (no)
+        :downloadData]
+        :checkData|
+        :launchModel]
+        :checkModel|
+        if (everything is ok) then (no)
           :invalidData>
         else (yes)
           :ready>
         endif
       endif
-
     end fork
+    stop
 
     |Pandora Contract|
     start
@@ -68,6 +71,7 @@ partition startCognition {
 }
 
 partition cognitiveMining {
+  :updateWorkersList]
   :cognitiveJobStarted/
   fork
     :waitingForResponses;
@@ -75,6 +79,30 @@ partition cognitiveMining {
   fork again
     |Workers|
     start
+    :runModel]
+    :uploadResults]
+    stop
   end fork
+}
+
+|Pandora Contract|
+partition validateCognition {
+  start
+  if (∃ timeOut) then (yes)
+    :updateTimeEstimation/
+    fork
+      :waitingForResponses;
+      detach
+    fork again
+      |Workers|
+      start
+      :provideTimeEstimation>
+      |Pandora Contract|
+    end fork
+  elseif (noTries > N) then (yes)
+    :repeatLottery|
+  else (everything fine)
+    stop
+  endif
 }
 @enduml
