@@ -21,10 +21,10 @@ entity "Cognition Contract" as cognition
 
 activate workers
 workers -> cognition: readData
-cognition --> workers: << cognitive job info >>
+cognition --> workers: < cognitive job info >
 workers ->> ipfs: download
 ... downloading ...
-ipfs -->> workers: << files >>
+ipfs -->> workers: < files >
 workers -> workers: integrityCheck
 workers -> workers: consistencyCheck
 alt Data are incorrect
@@ -37,8 +37,9 @@ else Data are correct
   activate nn
   workers -> nn: getDetails
   activate pandora
-  alt Worker declines job
+  alt Worker declines
     workers ->> pandora: jobDeclined
+    pandora -[#red]->x workers: penalty
     group repeat workers_loop
     end
     |||
@@ -48,11 +49,11 @@ else Data are correct
     deactivate pandora
     workers ->> nn: compute
   ... computing ...
-    nn -->> workers: << results >>
+    nn -->> workers: < results >
     deactivate nn
     workers ->> ipfs: upload
   ... uploading ...
-    ipfs -->> workers: << addresses >>
+    ipfs -->> workers: < addresses >
     workers -> cognition: acceptResults
     deactivate workers
     activate cognition
