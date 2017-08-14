@@ -1,0 +1,40 @@
+@startuml
+box "Client" #white
+  actor "Data provider" as author
+  participant "Client app" as app
+end box
+
+database IPFS as ipfs
+
+box "Pandora Boxchain" #white
+  participant "Worker node" as worker
+  control "Pandora contract" as contract
+  collections "Pandora network" as network
+end box
+
+activate app
+app->ipfs: upload
+note right of app
+  JSON metadata
+  on data entry
+end note
+ipfs-->app: file address
+
+app->ipfs: upload
+note right of app
+  HDF5 files 
+  with data
+end note
+ipfs-->app: file address
+
+app->>contract: create<Kernel/Dataset>()
+
+activate contract
+create control "Kernel contract" as kernel
+contract-->kernel: new
+... Mining transaction in Ethereum ...
+contract-->>app: Kernel contract address
+contract-->>network: newKernel/Dataset <<event>>
+deactivate contract
+|||
+@enduml
