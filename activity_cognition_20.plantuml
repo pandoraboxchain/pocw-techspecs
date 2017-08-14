@@ -4,105 +4,46 @@
 
 |Pandora Contract|
 start
-
-partition checkInputs {
-  if (kernel.input_dim = dataset.dim) then (yes)
-    if (client.deposit = kernel.job_complexity etc) then (yes)
-    else (no)
-      :error#2>
-      end
-    endif
-  else (no)
-    :error#1>
-    end
-  endif
-}
-
-partition startCognition {
-  repeat
-
-    :lottery|
-    :cognitiveJobCreated/
-    fork
-      :waitingForResponses;
-      detach
-    fork again
-      |Workers|
-      start
-      if (busy) then (yes)
-        :busy>
-      else (no)
-        :downloadData]
-        :checkData|
-        :launchModel]
-        :checkModel|
-        if (everything is ok) then (no)
-          :invalidData>
-        else (yes)
-          :ready>
-        endif
-      endif
-    end fork
-    stop
-
-    |Pandora Contract|
-    start
-    fork
-      :workerResponse<
-    fork again
-      :workerResponse<
-    fork again
-      :...<
-    end fork
-
-    if (∃ response = invalidData) then (yes)
-      :Invalid data arbitrage|
-      end
-    elseif (∃ response = busy) then (yes)
-      :penaltyToWorker#1]
-    elseif (noTries > N) then (yes)
-      :paybackClient(noValidationDeposit)]
-      :cognitiveJobCancelled(reason#1)/
-      end
-    else (timeout)
-      :penaltyToWorker#2]
-    endif
-  repeat while (∀ responses = accept) is (no)
-}
+:∀ responses = accept}
 
 partition cognitiveMining {
+  start
   :updateWorkersList]
   :cognitiveJobStarted/
   fork
     :waitingForResponses;
-    detach
+
+    while (∃ timeOut) is (yes)
+      :updateTimeEstimation/
+      fork
+        :waitingForResponses;
+        detach
+      fork again
+        |Workers|
+        start
+        :provideTimeEstimation>
+      end fork
+
+      |Pandora Contract|
+      if (timeEstimation is given | no of tires > N) then (timeout)
+        :penaltyToWorker#2]
+        :repeatLottery(inPart)|
+        detach
+      else (yes)
+        :penaltyToWorker#3]
+      endif
+    endwhile (noTimeout)
   fork again
     |Workers|
     start
     :runModel]
     :uploadResults]
-    stop
+    :commitJob]
   end fork
 }
 
 |Pandora Contract|
 partition validateCognition {
-  start
-  if (∃ timeOut) then (yes)
-    :updateTimeEstimation/
-    fork
-      :waitingForResponses;
-      detach
-    fork again
-      |Workers|
-      start
-      :provideTimeEstimation>
-      |Pandora Contract|
-    end fork
-  elseif (noTries > N) then (yes)
-    :repeatLottery|
-  else (everything fine)
-    stop
-  endif
+  stop
 }
 @enduml
