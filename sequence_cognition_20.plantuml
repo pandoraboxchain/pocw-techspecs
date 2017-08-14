@@ -40,7 +40,7 @@ else Data are correct
   alt Worker declines
     workers ->> pandora: jobDeclined
     pandora -[#red]->x workers: penalty
-    group repeat workers_loop
+    group repeat [workers lottery]
     end
     |||
   else Worker accepts job
@@ -54,6 +54,19 @@ else Data are correct
     workers ->> ipfs: upload
   ... uploading ...
     ipfs -->> workers: < addresses >
+    opt timeout
+      pandora -[#blue]->> workers: updateTimeEstimation
+      activate pandora
+      alt Worker responses
+        workers ->> pandora: updateTimeEstimation
+        pandora -[#red]->x workers: smallPenalty
+      else Worker does not response
+        pandora -[#red]->x workers: penalty
+        group repeat [workers lottery]
+        end
+      end
+      deactivate pandora
+    end
     workers -> cognition: acceptResults
     deactivate workers
     activate cognition
