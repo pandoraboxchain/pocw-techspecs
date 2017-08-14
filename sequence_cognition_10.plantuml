@@ -72,10 +72,7 @@ loop until all batches are accepted by workers, with N repeat limit
 ... mining transaction ...
   pandora -->> workers: << newJob >> event
   deactivate pandora
-
-== Main Cognitive Work ==
   activate workers
-
   alt Active workers
     |||
     ref over pandora, nn: Cognition
