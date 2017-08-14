@@ -107,5 +107,27 @@ cognition --> pandora: validateResults
 deactivate cognition
 activate pandora
 
+pandora -->> validators: << validate >> event
+activate validators
+validators -> cognition: readData
+cognition --> validators: << cognitive job info >>
+validators ->> ipfs: download
+... downloading ...
+ipfs -->> validators: << files >>
+validators -> nn: loadNetwork
+activate nn
+validators -> nn: getDetails
+validators ->> pandora: jobAccepted
+activate pandora
+pandora -> pandora: updateValidators
+'... mining transaction ...
+deactivate pandora
+validators ->> nn: compute
+... computing ...
+nn -->> validators: << results >>
+deactivate nn
+validators -> cognition: validationResults
+deactivate validators
+
 deactivate dapp
 @enduml
