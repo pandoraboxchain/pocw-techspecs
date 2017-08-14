@@ -43,10 +43,8 @@ partition startCognition {
         endif
       endif
     end fork
-    stop
 
     |Pandora Contract|
-    start
     fork
       :workerResponse<
     fork again
@@ -71,38 +69,6 @@ partition startCognition {
 }
 
 partition cognitiveMining {
-  :updateWorkersList]
-  :cognitiveJobStarted/
-  fork
-    :waitingForResponses;
-    detach
-  fork again
-    |Workers|
-    start
-    :runModel]
-    :uploadResults]
-    stop
-  end fork
-}
-
-|Pandora Contract|
-partition validateCognition {
-  start
-  if (∃ timeOut) then (yes)
-    :updateTimeEstimation/
-    fork
-      :waitingForResponses;
-      detach
-    fork again
-      |Workers|
-      start
-      :provideTimeEstimation>
-      |Pandora Contract|
-    end fork
-  elseif (noTries > N) then (yes)
-    :repeatLottery|
-  else (everything fine)
-    stop
-  endif
+  stop
 }
 @enduml
