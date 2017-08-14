@@ -77,7 +77,7 @@ loop until all batches are accepted by workers, with N repeat limit
     |||
     ref over pandora, nn: Cognition
     |||
-  else Inactive workers (= decline response or no response within some timeframe)
+  else Inactive workers (= no response within some timeframe)
     pandora -[#red]->x workers: penalty
     group repeat
     end
