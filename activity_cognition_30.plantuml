@@ -1,0 +1,60 @@
+@startuml
+|Pandora Contract|
+|Validators|
+
+|Pandora Contract|
+start
+
+partition validateCognition {
+  repeat
+
+    :lottery|
+    :validationJobCreated/
+    fork
+      :waitingForResponses;
+      detach
+    fork again
+      |Validators|
+      start
+      if (busy) then (yes)
+        :busy>
+      else (no)
+        :downloadData]
+        :downloadResults]
+        :launchModel]
+        :checkResults]
+        if (worker results are correct) then (no)
+          :wrongResults>
+        else (yes)
+          :ready>
+        endif
+      endif
+    end fork
+
+    |Pandora Contract|
+    fork
+      :validatorResponse<
+    fork again
+      :validatorResponse<
+    fork again
+      :...<
+    end fork
+
+    if (∃ response = wrongResults) then (yes)
+      :Cognition arbitrage|
+      detach
+    elseif (∃ response = busy) then (yes)
+      :penaltyToValidator#1]
+    elseif (noTries > N) then (yes)
+      :paybackClient(onlyPartOfValidation)]
+      :cognitiveJobCompleted(partialValidation)/
+      stop
+    else (timeout)
+      :penaltyToValidator#2]
+    endif
+  repeat while (∄ responses = busy | timeout) is (no)
+  :payoutsAndMining|
+  :cognitiveJobCompleted/
+  stop
+}
+@enduml
