@@ -29,19 +29,20 @@ loop until validators found, with reducing reputation limit, but < N times
   pandora -> pandora: selectValidators
   pandora -->> cognition: initWithValidators
 ... mining transaction ...
-  pandora -->> validators: << newValidationJob >> event
+  pandora -[#blue]->> validators: newValidationJob
   deactivate pandora
 
   alt Validator timeout
+    pandora -[#red]->x validators: penalty
     group repeat
     end
   else Validator active
     activate validators
     validators -> cognition: readData
-    cognition --> validators: << cognitive job info >>
+    cognition --> validators: < cognitive job info >
     validators ->> ipfs: download
 ... downloading ...
-    ipfs -->> validators: << files >>
+    ipfs -->> validators: < files >
     validators -> nn: loadNetwork
     activate nn
     validators -> nn: getDetails
@@ -50,6 +51,7 @@ loop until validators found, with reducing reputation limit, but < N times
       validators ->> pandora: jobAccepted(timeEstimation)
     else Validator declined job
       validators ->> pandora: jobDeclined
+      pandora -[#red]->x validators: penalty
       group repeat
       end
     end
@@ -57,21 +59,21 @@ loop until validators found, with reducing reputation limit, but < N times
 
     deactivate validators
 ... mining transaction ...
-    pandora ->> validators: << startValidation >> event
+    pandora -[#blue]->> validators: startValidation
     activate validators
     deactivate pandora
 
     par
       validators ->> nn: compute
       ... computing ...
-      nn -->> validators: << results >>
+      nn -->> validators: < results >
       deactivate nn
     else
       ipfs <<- validators: download
       activate ipfs
       note right: downloading\ncomputation\nresults
       ... downloading ...
-      ipfs -->> validators: << files >>
+      ipfs -->> validators: < files >
       deactivate ipfs
     end
     validators -> validators: compareResults
@@ -83,31 +85,33 @@ loop until validators found, with reducing reputation limit, but < N times
     alt Validation didn't confirmed calculations
       ref over pandora, workers, validators: Arbitrage
     else Validator answer timeout
-      pandora -->> validators: << updateTimeEstimation >> event
+      pandora -[#blue]->> validators: updateTimeEstimation
       activate pandora
       alt Validator responses
         validators ->> pandora: updateTimeEstimation
+        pandora -[#red]->x validators: smallPenalty
       else Validator does not response
+        pandora -[#red]->x validators: penalty
         group repeat
         end
       end
       deactivate pandora
     else Validation confirmed original calculations
-      == Payouts ==
-      pandora ->>o pandora: makePaymentsAndMine
-      'cognition ->>o pandora: mine
-      'cognition ->>o pandora: pay(workers)
-      'cognition ->>o pandora: pay(validators)
-      'cognition ->>o pandora: pay(dataProvider)
-      'cognition ->>o pandora: pay(kernelProvider)
-      'cognition ->>o pandora: pay(researchWork)
+      pandora -[#green]->>o pandora: makePaymentsAndMine
+      'cognition -[#green]->>o pandora: mine
+      'cognition -[#green]->>o pandora: pay(workers)
+      'cognition -[#green]->>o pandora: pay(validators)
+      'cognition -[#green]->>o pandora: pay(dataProvider)
+      'cognition -[#green]->>o pandora: pay(kernelProvider)
+      'cognition -[#green]->>o pandora: pay(researchWork)
       ... mine transactions ...
     end
   end
 end
 group if [Not all validators found / worked]
-  pandora -->> dapp: << jobCompleted\nPartialValidation >> event
-  pandora -->>o client: partialPayout
-  pandroa -->>o pandora: makePayments\n(exceptValidators)
+  pandora -[#blue]->> dapp: jobCompleted\nPartialValidation
+  pandora -[#green]->>o client: partialPayout
+  pandora -[#green]->>o pandora: makePayments\n(exceptValidators)
 end
+|||
 @enduml
