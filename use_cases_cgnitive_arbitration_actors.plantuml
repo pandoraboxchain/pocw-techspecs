@@ -27,13 +27,13 @@ rectangle "Final Categories" {
   actor :True Node(s)\n(TN): as tn
 }
 
-own --|> workers
-ovn --|> validators
-caan --|> arbiters
-paan --|> workers
+own --|> workers: lottery
+ovn --|> validators: lottery
+caan --|> arbiters: lottery
+paan --|> workers: opened applications
 
-paan <|-- paqn
-paan <|-- paen
+paan <|-- paqn: if responded
+paan <|-- paen: if didn't responded
 
 apn <|.. own: in case of appeal
 apn <|.. ovn: in case of appeal
