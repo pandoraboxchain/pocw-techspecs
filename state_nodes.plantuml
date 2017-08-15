@@ -27,12 +27,12 @@ worker: — no reputation requirements
 worker: — performs cognitive mining by PoS lottery
 
 validator: — inherits worker properties
-validator: — has higher stake bound\n   by contract (validator_stake)
-validator: — participates in cognitive\n   work validation by PoS lottery
-validator: — can participate in\n   Public Arbitration Round
+validator: — has higher stake bound\n    by contract (validator_stake)
+validator: — participates in cognitive\n    work validation by PoS lottery
+validator: — can participate in\n    Public Arbitration Round
 
 arbiter: — inherits validator properties
-arbiter: — participates in Closed\n   Arbitration by PoS lottery
+arbiter: — participates in Closed\n    Arbitration by PoS lottery
 
 governor: — inherits arbiter properties
 governor: — votes for protocol changes
@@ -49,35 +49,35 @@ state "Initial Validator" as initialValidator
 state "Closed Arbitration\nArbiter Node" as closedArbiter
 state "Public Arbitration\nParticipant Node" as public
 
-initialWorker: — assigned cognitive\n   work by a PoS lottery
-initialWorker: — results of CW can be\n   checked by validator
-initialWorker: — can make Initial Appeal\n   on validator's check
-initialWorker: — can make Public Appeal\n   on Arbiter Collegium check
-initialWorker: — looses stake and/or\n   reputation if found Faulty
-initialWorker: — acquires reputation\n   if found to be a True Node
-initialWorker: — acquires additional\n   reputation & stake\n   if Appeal is satisfied
-initialWorker: — looses stake/reputation\n   in case of timeouts
+initialWorker: — assigned cognitive work by a PoS lottery
+initialWorker: — results of CW can be checked by validator
+initialWorker: — can make Initial Appeal on validator's check
+initialWorker: — can make Public Appeal on Arbiter Collegium check
+initialWorker: — looses stake and/or reputation if found Faulty
+initialWorker: — acquires reputation if found to be a True Node
+initialWorker: — acquires additional reputation & stake if Appeal is satisfied
+initialWorker: — looses stake/reputation in case of timeouts
 
-initialValidator: — assigned Cognitive\n   Work Validation tasks
-initialValidator: — results of validation may be\n   checked by Arbiter Collegium\n   in Closed Arbitration Round
-initialValidator: — can make Public Appeal\n   on Arbiter Collegium check
-initialValidator: — looses stake and/or\n   reputation if found Faulty
-initialValidator: — acquires reputation\n   if found to be a True Node
-initialValidator: — acquires additional\n   reputation & stake\n   if Appeal is satisfied
-initialValidator: — looses stake/reputation\n   in case of timeouts
+initialValidator: — assigned Cognitive Work Validation tasks
+initialValidator: — results of validation may be checked by\n    Arbiter Collegium in Closed Arbitration Round
+initialValidator: — can make Public Appeal on Arbiter Collegium check
+initialValidator: — looses stake and/or reputation if found Faulty
+initialValidator: — acquires reputation if found to be a True Node
+initialValidator: — acquires additional reputation & stake if Appeal is satisfied
+initialValidator: — looses stake/reputation in case of timeouts
 
 closedArbiter: — assigned Closed Arbitration tasks
-closedArbiter: — results of Closed Arbitration\n   can be checked by Public Arbitration Round
+closedArbiter: — results of Closed Arbitration\n    can be checked by Public Arbitration Round
 closedArbiter: — looses stake and/or reputation if found Faulty
 closedArbiter: — acquires reputation if found to be a True Node
-closedArbiter: — acquires additional reputation & stake\n   if third-patry Public Appeal is satisfied
-closedArbiter: — looses stake/reputation\n   in case of timeouts
+closedArbiter: — acquires additional reputation & stake\n    if third-patry Public Appeal is satisfied
+closedArbiter: — looses stake/reputation in case of timeouts
 
 public: — performs Public Arbitration Round
-public: — looses stake/reputation\n   in case of timeouts
-public: — looses stake/reputation\n   if Quorum does not reach Verdict
-public: — acquires reputation+stake\n   if Quorum reaches Verdict and its\n   vote was the same as the Verdict
-public: — looses reputation+stake\n   if Quorum reaches Verdict and its\n   vote was not the same as the Verdict
+public: — looses stake/reputation\n    in case of timeouts
+public: — looses stake/reputation\n    if Quorum does not reach Verdict
+public: — acquires reputation+stake\n    if Quorum reaches Verdict and its\n    vote was the same as the Verdict
+public: — looses reputation+stake\n    if Quorum reaches Verdict and its\n    vote was not the same as the Verdict
 
 worker -right-> initialWorker: assigned by lottery
 validator -right-> initialValidator: assigned by lottery
