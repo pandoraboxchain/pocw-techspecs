@@ -1,0 +1,96 @@
+@startuml
+state "Light Node" as light
+
+state "Full Node" as full
+state "Worker Node" as worker
+state "Validator Node" as validator
+state "Arbiter Node" as arbiter
+state "Governor Node" as governor
+
+light: — no stake
+light: — no reputation
+light: — no cognitive mining
+light: — no copy two-level consensus data
+light: — no blockchain registration
+light: — connects to full or higher node
+
+full: — no stake
+full: — no reputation
+full: — no cognitive mining
+full: — no blockchain registration
+full: — copy two-level consensus data
+
+worker: — registered in blockchain
+worker: — operates under smart contract
+worker: — worker_stake bound by contract
+worker: — no reputation requirements
+worker: — performs cognitive mining by PoS lottery
+
+validator: — inherits worker properties
+validator: — has higher stake bound\n   by contract (validator_stake)
+validator: — participates in cognitive\n   work validation by PoS lottery
+validator: — can participate in\n   Public Arbitration Round
+
+arbiter: — inherits validator properties
+arbiter: — participates in Closed\n   Arbitration by PoS lottery
+
+governor: — inherits arbiter properties
+governor: — votes for protocol changes
+governor: — governs Pandora Foundation
+
+[*] --> full
+[*] --> light
+full -down-> worker: added stake
+worker -down-> validator: added stake
+governor -up-> arbiter: lost reputation
+
+state "Initial Worker" as initialWorker
+state "Initial Validator" as initialValidator
+state "Closed Arbitration\nArbiter Node" as closedArbiter
+state "Public Arbitration\nParticipant Node" as public
+
+initialWorker: — assigned cognitive\n   work by a PoS lottery
+initialWorker: — results of CW can be\n   checked by validator
+initialWorker: — can make Initial Appeal\n   on validator's check
+initialWorker: — can make Public Appeal\n   on Arbiter Collegium check
+initialWorker: — looses stake and/or\n   reputation if found Faulty
+initialWorker: — acquires reputation\n   if found to be a True Node
+initialWorker: — acquires additional\n   reputation & stake\n   if Appeal is satisfied
+initialWorker: — looses stake/reputation\n   in case of timeouts
+
+initialValidator: — assigned Cognitive\n   Work Validation tasks
+initialValidator: — results of validation may be\n   checked by Arbiter Collegium\n   in Closed Arbitration Round
+initialValidator: — can make Public Appeal\n   on Arbiter Collegium check
+initialValidator: — looses stake and/or\n   reputation if found Faulty
+initialValidator: — acquires reputation\n   if found to be a True Node
+initialValidator: — acquires additional\n   reputation & stake\n   if Appeal is satisfied
+initialValidator: — looses stake/reputation\n   in case of timeouts
+
+closedArbiter: — assigned Closed Arbitration tasks
+closedArbiter: — results of Closed Arbitration\n   can be checked by Public Arbitration Round
+closedArbiter: — looses stake and/or reputation if found Faulty
+closedArbiter: — acquires reputation if found to be a True Node
+closedArbiter: — acquires additional reputation & stake\n   if third-patry Public Appeal is satisfied
+closedArbiter: — looses stake/reputation\n   in case of timeouts
+
+public: — performs Public Arbitration Round
+public: — looses stake/reputation\n   in case of timeouts
+public: — looses stake/reputation\n   if Quorum does not reach Verdict
+public: — acquires reputation+stake\n   if Quorum reaches Verdict and its\n   vote was the same as the Verdict
+public: — looses reputation+stake\n   if Quorum reaches Verdict and its\n   vote was not the same as the Verdict
+
+worker -right-> initialWorker: assigned by lottery
+validator -right-> initialValidator: assigned by lottery
+arbiter -right-> closedArbiter: assigned by lottery
+validator -right-> public: becomes by application
+arbiter -left-> public: becomes by application
+public -right-> arbiter: acquired reputation
+public -down-> governor: acquired reputation
+public -up-> full: lost reputation & stake
+
+initialWorker -up-> full: lost/removed stake
+initialValidator -up-> worker: lost/removed stake
+closedArbiter -up-> validator: lost reputation
+initialValidator -down-> arbiter: acquired reputation
+closedArbiter -down-> governor: acquired reputation
+@enduml
