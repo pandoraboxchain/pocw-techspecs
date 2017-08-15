@@ -1,0 +1,90 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+title Pandora Boxchain Cognitive Arbitrage Use Cases
+
+actor :Initial Worker: as worker
+actor :Initial Validator: as validator
+actor :Arbiter Collegium: as arbiters
+actor :Public Arbitration Quorum: as quorum
+
+rectangle "1. Cognitive Work" {
+usecase work as "Initial Cognitive Work
+==
+– only one worker per batch
+defined by the Client
+– performed before anything else
+..Result..
+Data suited for validation"
+
+usecase validation as "Initial Cognitive Validation
+==
+– exactly one validator participate
+..Result..
+Verdict confirming or unconfirming
+the original cognitive work results"
+
+worker -- (work): performed upon\nlottery selection
+validator -- (validation): performed upon\nlottery selection
+
+(work) .> (validation): follows
+}
+
+rectangle "2. Closed Cognition Arbitration Round" {
+usecase iappeal as "Initial Appeal
+==
+– can be made if Initial Worker
+is found Faulty Node under Initial Validation
+– requires Initial Worker stake to be raised
+to the level of Arbitration Collegium joint stake
+..Result..
+Start of Closed Arbitrage procedure"
+
+usecase closed as "Closed Arbitrage
+==
+– selects three Arbiter Nodes becoming
+Arbitration Collegium of the round
+..Result..
+Verdict confirming or unconfirming
+the original validator's verdict
+or absence of Verict
+(No Verdict case)"
+
+worker -- (iappeal): if found Faulty\nhas right to
+arbiters -- (closed): performs upon\nlottery selection
+
+(closed) <. (iappeal): follows
+}
+
+rectangle "3. Public Cognition Arbitration Round" {
+usecase pappeal as "Public Appeal
+==
+– can be made by the node found Faulty 
+(either Initial Worker or Initial Validator)
+under Closed Cognition Arbitration Round by the
+Arbitration Collegium 
+– requires Fulty Node stake to be raised
+to the level of 2 x Arbitration Collegium joint stake
+..Result..
+Start of Public Arbitrage procedure"
+
+usecase public as "Public Arbitration
+==
+– any Worker Node with significant stake
+or/and reputation can apply and, if reports results
+of cognitive calculations withing predefined timeframe
+become part of Public Arbitration Quorum taking Verdict
+..Result..
+Verdict (75%+) confirming or unconfirming
+the Closed Arbitration and/or
+Initial Validation Verdict
+or absence of 75%+ Verdict
+(No Verdict case)"
+
+worker .. (pappeal): if found Faulty\nhas right to
+validator .. (pappeal): if found Faulty\nhas right to
+quorum -- (public): all applicants\nthat repeated cognitive work
+(public) <. (pappeal): follows
+}
+@enduml
