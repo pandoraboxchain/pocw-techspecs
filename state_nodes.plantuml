@@ -1,0 +1,33 @@
+@startuml
+state "Idle node" as idle
+state "Cognitive work" as work
+state "Governing work" as gov
+state "Under validation" as valid
+
+[*] --> idle: initial state
+
+idle --> work: initial cognitive work or\nvalidation/arbitration work
+idle --> gov: for governors only
+gov --> idle: after governor\nvote is made
+work --> valid: if and while validation/\narbitration runs
+valid --> idle: when validation/\narbitration completes
+work --> idle: when cognitive work\ncompletes and no\nvalidation/arbitration runs
+valid --> [*]: when node lost stake
+idle --> [*]: stake sold
+
+idle: – stake is defined, but can be sold
+idle: – reputation is fixed and does not change
+idle: – no other work is being\n    performed, no resources are used
+
+work: – stake is bound
+work: – cognitive work performed\n    on full hardware capacity
+work: – only one job at a time
+
+valid: – stake is bound
+valid: – no other work is being\n    performed, no resources are used
+valid: – can't perform another job
+
+gov: – stake is bound
+gov: – no other work is being\n    performed, no resources are used
+gov: – can't perform another job
+@enduml
