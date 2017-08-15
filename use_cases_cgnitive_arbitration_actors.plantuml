@@ -1,0 +1,50 @@
+@startuml
+rectangle "Generic Pools" {
+  actor :Worker Nodes: as workers
+  actor :Validator Nodes: as validators
+  actor :Arbiter Nodes: as arbiters
+
+  validators --|> workers: high stake
+  arbiters --|> validators: high reputation
+}
+
+rectangle "Closed Arbitration\nParticipants" {
+  actor :Original Worker\nNode (OWN): as own
+  actor :Original Validator\nNode (OVN): as ovn
+  actor :3 x Closed Arbitration\nArbiter Nodes\n(CAAN): as caan
+}
+
+actor :Appealing Node\n(ApN): as apn
+
+rectangle "Public Arbitration\nParticipants" {
+  actor :Public Arbitration\nApplicant Nodes\n(PAAN): as paan
+  actor :Public Arbitration\nQuorum Nodes\n(PAQN): as paqn
+  actor :Public Arbitration\nExcluded Nodes\n(PAEN): as paen
+}
+
+rectangle "Final Categories" {
+  actor :Faulty Node(s)\n(FN): as fn
+  actor :True Node(s)\n(TN): as tn
+}
+
+own --|> workers
+ovn --|> validators
+caan --|> arbiters
+paan --|> workers
+
+paan <|-- paqn
+paan <|-- paen
+
+apn <|.. own: in case of appeal
+apn <|.. ovn: in case of appeal
+
+'fn <|.. own
+'fn <|.. ovn
+'fn <|.. caan
+'fn <|.. paqn: <25%
+
+'tn <|.. own
+'tn <|.. ovn
+'tn <|.. caan
+'tn <|.. paqn: >75%
+@enduml
