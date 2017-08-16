@@ -1,0 +1,36 @@
+@startuml
+|Pandora Contract|
+|Initial Worker|
+
+|Pandora Contract|
+start
+
+partition initialAppeal {
+  :appealOpened/
+  fork
+    :waitingForResponses;
+    detach
+  fork again
+    |Initial Worker|
+    if (wantToAppeal?) then (yes)
+      :makeInitialAppeal>
+    else (no)
+      :acceptValidation>
+    endif
+  end fork
+
+  |Pandora Contract|
+  if (initialAppeal) then (yes)
+  elseif (acceptedValidation) then (yes)
+    :punishWorker(leaveABitOfStake);
+    stop
+  else (timeout)
+    :punishWorker(removeStake & reputation);
+    stop
+  endif
+}
+
+partition closedArbitrage {
+  stop
+}
+@enduml
