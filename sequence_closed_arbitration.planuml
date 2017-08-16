@@ -1,0 +1,108 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
+
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Worker Nodes" as workers
+  control "Keras/TensorFlow" as nn
+  collections "Validating Nodes" as validators
+  collections "Arbiters" as arbiters
+end box
+
+entity "Cognition Contract" as cognition
+
+== Closed Cognitive Arbitration Round ==
+
+loop until arbitors found, but < N times
+  |||
+  ref over pandora: lottery
+  pandora -> pandora: selectArbitors
+  activate pandora
+  pandora -->> cognition: initWithArbitors
+... mining transaction ...
+  pandora -[#blue]->> arbiters: newArbitrationJob
+  deactivate pandora
+
+  alt Arbiter timeout
+    pandora -[#red]->x arbiters: penalty
+    group repeat
+    end
+  else Arbiter active
+    activate arbiters
+    arbiters -> cognition: readData
+    cognition --> arbiters: < cognitive job info >
+    arbiters ->> ipfs: download
+... downloading ...
+    ipfs -->> arbiters: < files >
+    arbiters -> nn: loadNetwork
+    activate nn
+    arbiters -> nn: getDetails
+    activate pandora
+    alt Arbiter accepts job
+      arbiters ->> pandora: jobAccepted(timeEstimation)
+    else Arbiter declined job
+      arbiters ->> pandora: jobDeclined
+      pandora -[#red]->x arbiters: penalty
+      group repeat
+      end
+    end
+    pandora -> pandora: updateArbiters
+
+    deactivate arbiters
+... mining transaction ...
+    pandora -[#blue]->> arbiters: startArbitration
+    activate arbiters
+    deactivate pandora
+
+    par
+      arbiters ->> nn: compute
+      ... computing ...
+      nn -->> arbiters: < results >
+      deactivate nn
+    else
+      ipfs <<- arbiters: download
+      activate ipfs
+      note right: downloading\ncomputation\nresults
+      ... downloading ...
+      ipfs -->> arbiters: < files >
+      deactivate ipfs
+    end
+    arbiters -> arbiters: compareResults
+    arbiters ->> cognition: arbitrationVerdict
+    deactivate arbiters
+
+    cognition -> pandora: arbitrationResults
+
+    alt Arbitration verdict is reached
+      ref over pandora, workers, validators: Public Appeal
+    else Arbiter answer timeout
+      pandora -[#blue]->> arbiters: updateTimeEstimation
+      activate pandora
+      alt Arbiter responses
+        arbiters ->> pandora: updateTimeEstimation
+        pandora -[#red]->x arbiters: smallPenalty
+      else Arbiter does not response
+        pandora -[#red]->x arbiters: penalty
+        group repeat
+        end
+      end
+      deactivate pandora
+    end
+  end
+end
+group if [Not all arbiters found / worked]
+  pandora -[#blue]->> dapp: jobCompleted\nArguableValidation
+  pandora -[#green]->>o client: partialPayout
+  pandora -[#green]->>o pandora: makePayments\n(accepingValidatorVerdict)
+end
+|||
+
+deactivate pandora
+@enduml
