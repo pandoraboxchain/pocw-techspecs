@@ -8,9 +8,6 @@ box "Workers"
   collections "Worker Nodes" as workers
   control "Keras/TensorFlow" as nn
   collections "Validating Nodes" as validators
-end box
-
-box "Arbiters"
   collections "Arbiters" as arbiters
 end box
 
@@ -26,9 +23,14 @@ pandora -[#blue]->> workers: failedResults
 alt Worker agrees
   workers ->> pandora: accept
   pandora -[#red]->x workers: penalty
+  pandora -[#green]->>o pandora: makePaymentsAndMine
+  ... mine transactions ...
 else Worker timeouts
   pandora -[#red]->x workers: biggerPenalty
+  pandora -[#green]->>o pandora: makePaymentsAndMine
+  ... mine transactions ...
 else Worker appeals
+  workers -[#green]->>o pandora: increaseStake
   workers ->> pandora: appeal
   ref over pandora, arbiters: Closed Cognitive Arbitration Round
 end
