@@ -1,0 +1,77 @@
+@startuml
+state "Data Check & Cognitive Work" as cognition {
+  state "Lottery for workers" as lottery1
+  state "Gathering workers\nand validating data" as wait1
+  state "Cognitive request rejected /\npartially fullfilled" as rejected
+  state "Cognitive work" as work
+
+  lottery1: – All worker nodes participate
+  lottery1:   (including validators, arbiters and governors)
+  lottery1: – Chances are proportional to the stake
+  lottery1:   weighted on client speed requirements
+
+  wait1: – Awaits congirmations
+  wait1:   from all selected workers
+  wait1: – Timeout leads to penalty
+  wait1:   and worker replacements
+
+  rejected: – Client deposit is returned for unprocessed data
+  rejected: – Client data check fee may be partially withheld
+  rejected: – Client is notified about the rejection reason
+
+  work: – Limited by time
+  work: – First timeout notifies workers
+  work:   and gives them possibility to
+  work:   prolong the task
+  work: – Second timeout initiates new
+  work:   lottery to replace delayed
+  work:   workers with a new ones
+
+  [*] --> lottery1: triggered\nby the client
+  lottery1 --> wait1
+  lottery1 -right-> rejected: not enough\nworkers present
+  wait1 --> lottery1: some workers\nrejected\nor timed out
+  wait1 --> rejected: reported invalid\nby N% workers
+  wait1 --> rejected: timeout\nlimit\nreached
+  wait1 --> work: data are ok
+  work --> work: first\ntimeouts
+  work --> lottery1: second\ntimeout
+  rejected --> [*]
+}
+
+state "Validation" as validation {
+  state "Lottery for validators" as lottery2
+  state "Gathering validators" as wait2
+  state "Validating" as validating
+  state "Disclosing Veto" as disclosing1
+  state "Counting votes" as counting1
+  state "Killing validators" as killing1
+  state "Delivering results" as delivering1
+
+  work --> lottery2: all results\nare delivered
+  lottery2 --> wait2
+  lottery2 --> delivering1: not enough\nvalidators
+  wait2 --> lottery2: some validators\nrejected or\ntimed out
+  wait2 --> validating
+  wait2 --> delivering1: timeout\nlimit\nreached
+  validating --> lottery2: for timed out\nvalidators
+  validating --> disclosing1: all validators\nsumitted results
+  disclosing1 --> counting1: validators\nsubmitted keys
+  disclosing1 --> killing1: some validators\ntimed out
+  killing1 --> counting1
+  counting1 --> delivering1: no Faulty\nnodes
+  delivering1 --> [*]
+}
+
+state "Arbitration" as arbitration {
+  state "Accepting Initial Appeals" as iappeal
+  state "Gathering Arbiters" as wait3
+  state "Closed Arbitrage" as carbitrage
+  state "Revealing results" as revealing1
+
+  counting1 --> iappeal: Faulty nodes\nfound
+  iappeal --> wait3
+  wait3 --> carbitrage
+  carbitrage --> revealing1
+}
+@enduml
