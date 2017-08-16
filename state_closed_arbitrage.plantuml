@@ -1,0 +1,13 @@
+@startuml
+state "Arbitration" as arbitration {
+  state "Accepting Initial Appeals" as iappeal
+  state "Gathering Arbiters" as wait3
+  state "Closed Arbitrage" as carbitrage
+  state "Revealing results" as revealing1
+
+  counting1 --> iappeal: Faulty nodes\nfound
+  iappeal --> wait3
+  wait3 --> carbitrage
+  carbitrage --> revealing1
+}
+@enduml
