@@ -1,0 +1,29 @@
+@startuml
+state "Initial Worker" as worker {
+  state "Idle" as idle
+  state "Won Lottery" as won
+  state "Checking Data" as checking
+  state "Cognitive Work" as work
+  state "Under Validation" as validating
+  state "True Node" as true
+  state "False Node" as false
+  state "Appealing" as appealing
+  state "Under Investigation" as investigation
+
+  [*] --> idle
+  idle --> won: by event
+  won --> idle: rejected
+  won --> checking: downloads\nand checks data
+  won --> [*]: went offline
+  checking --> work: data are ok\nnotified of acceptance
+  work --> validating: results are submitted
+  validating --> true: results are correct
+  true --> idle: return to base
+  validating --> false: results are incorrect
+  false --> idle: accepted or timeouted
+  false --> appealing: decided to appeal
+  appealing --> investigation
+  investigation --> true
+  investigation --> false
+}
+@enduml
