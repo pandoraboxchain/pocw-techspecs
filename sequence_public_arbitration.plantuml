@@ -1,0 +1,102 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
+
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Faulty Node" as faulty
+  control "Keras/TensorFlow" as nn
+  collections "Arbiters\nCollegium" as arbiters
+  collections "High Stake\n/Reputation\nNodes" as all
+end box
+
+entity "Cognition Contract" as cognition
+
+== Public Cognitive Arbitration Round ==
+
+activate pandora
+pandora -[#blue]->> all: publicArbitrage
+create collections "Public\nArbitration\nNodes" as public
+all -> public: new
+activate public
+public ->> pandora: readyToArbitrate
+... waiting for participants ...
+opt Participants not found
+  pandora -[#blue]->> dapp: jobCompleted\nArguableValidation
+  pandora -[#green]->>o client: partialPayout
+  pandora -[#green]->>o cognition: makePayments\n(accepingArbitersVerdict)
+  deactivate pandora
+  destroy cognition
+  |||
+end
+pandora ->> public: startArbitrage
+deactivate pandora
+
+alt Timeout
+  pandora -[#red]->x public: penalty
+else Nodes active
+  activate public
+  public -> cognition: readData
+  cognition --> public: < cognitive job info >
+  public ->> ipfs: download
+... downloading ...
+  ipfs -->> public: < files >
+  public -> nn: loadNetwork
+  activate nn
+  public -> nn: getDetails
+
+  par
+    public ->> nn: compute
+    ... computing ...
+    nn -->> public: < results >
+    deactivate nn
+  else
+    ipfs <<- public: download
+    activate ipfs
+    note right: downloading\ncomputation\nresults
+    ... downloading ...
+    ipfs -->> public: < files >
+    deactivate ipfs
+  end
+  public -> public: compareResults
+  public ->> cognition: arbitrationVerdict
+  deactivate public
+
+  cognition -> pandora: arbitrationResults
+
+  opt Results delivery timeout
+    pandora -[#blue]->> public: updateTimeEstimation
+    activate pandora
+    alt Arbiter responses
+      public ->> pandora: updateTimeEstimation
+      pandora -[#red]->x public: smallPenalty
+    else Arbiter does not response
+      pandora -[#red]->x public: penalty
+    end
+  end
+
+  alt Arbitration verdict is reached
+    pandora -[#blue]->> dapp: jobCompleted
+    pandora -[#green]->>o cognition: makePayments
+    pandora -[#green]->>o cognition: distributeArbitrationStakes
+    deactivate pandora
+    destroy cognition
+    |||
+  else Arbitration verdict is not reached
+    pandora -[#blue]->> dapp: jobCompleted(arguableValidation)
+    pandora -[#red]->>o cognition: fineEverybody
+    deactivate pandora
+    destroy cognition
+    |||
+  end
+end
+|||
+
+deactivate pandora
+@enduml
