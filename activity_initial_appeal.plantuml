@@ -13,6 +13,7 @@ partition initialAppeal {
   fork again
     |Initial Worker|
     if (wantToAppeal?) then (yes)
+      :putAdditionalStake;
       :makeInitialAppeal>
     else (no)
       :acceptValidation>
@@ -20,14 +21,16 @@ partition initialAppeal {
   end fork
 
   |Pandora Contract|
-  if (initialAppeal) then (yes)
-  elseif (acceptedValidation) then (yes)
-    :punishWorker(leaveABitOfStake);
-    stop
-  else (timeout)
-    :punishWorker(removeStake & reputation);
-    stop
-  endif
+  repeat
+    if (initialAppeal) then (yes)
+    elseif (acceptedValidation) then (yes)
+      :punishWorker(leaveABitOfStake);
+      stop
+    else (timeout)
+      :punishWorker(removeStake & reputation);
+      stop
+    endif
+  repeat while (stakeIsSufficient) is (no)
 }
 
 partition closedArbitrage {
