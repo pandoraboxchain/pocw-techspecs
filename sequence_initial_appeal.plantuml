@@ -1,4 +1,9 @@
 @startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
+
 box "Distributed Data"
   entity "Pandora Contracts" as pandora
   database "IPFS" as ipfs
