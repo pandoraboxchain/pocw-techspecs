@@ -2,22 +2,28 @@
 state "Main Contract" as main {
   state "Cognitive Work Initialization" as cwi
   state "Cognitive Work Lottery" as cwl
+  state "Waiting Workers" as wait_wrk
 
   [*] --> cwi: client request
   cwi --> work: create
+  cwl --> wait_wrk
+  wait_wrk --> cwl: upon rejections\n& timeouts
 }
 
 
 state "Cognitive Work Contract" as work {
   state "Init" as work_init
-  state "Cognition" as cognition
+  state "Waiting Results" as cognition
+  state "Data Arbitrage" as data_arb
   state "Validation" as validation
 
   [*] --> work_init
   work_init --> cwl: callback
   work_init --> cognition
-  cognition --> cwl: upon rejections\nand timeouts
+  cwl --> cognition: workers
+ ' cognition --> cwl: upon rejections\nand timeouts
   cognition --> validation: upon all results\nare collected
+  cognition --> data_arb: incorrect\ndata\nreported
 }
 
 
@@ -36,9 +42,14 @@ state "Initial Worker Contract" as worker {
   cwl --> won: to winner nodes
 
   won --> checking: downloads\nand checks data
+  won --> wait_wrk: busy (=reject)
+  won --> idle: if rejected
   won --> [*]: went offline
-  checking --> working: data are ok\nnotified of acceptance
+  checking --> wait_wrk: accept
+  checking --> cognition: incorrect data
+  checking --> working: data are ok
   working --> validating: results are submitted
+  working --> cognition: results
   validating --> true: results are correct
   true --> idle: return to base
   validating --> false: results are incorrect
