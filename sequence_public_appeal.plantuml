@@ -1,1 +1,45 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "Client dApp" as dapp
+end box
 
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Faulty Node" as faulty
+  control "Keras/TensorFlow" as nn
+  collections "Arbiters\nCollegium" as arbiters
+  collections "Public\nArbitration\nNodes" as public
+end box
+
+entity "Cognition Contract" as cognition
+
+== Public Appeal ==
+
+activate pandora
+activate faulty
+
+pandora -[#blue]->> faulty: faultyNode
+
+alt Faulty Node agrees
+  faulty ->> pandora: accept
+  pandora -[#red]->x faulty: penalty
+  pandora -[#green]->>o pandora: makePaymentsAndMine
+  ... mine transactions ...
+else Faulty Node timeouts
+  pandora -[#red]->x faulty: biggerPenalty
+  pandora -[#green]->>o pandora: makePaymentsAndMine
+  ... mine transactions ...
+else Faulty Node appeals
+  faulty -[#green]->>o pandora: increaseStake
+  faulty ->> pandora: appeal
+  ref over pandora, public: Public Cognitive Arbitration Round
+end
+
+deactivate faulty
+deactivate pandora
+@enduml
