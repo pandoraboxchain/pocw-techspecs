@@ -1,0 +1,38 @@
+@startuml
+box "Distributed Data"
+  entity "Pandora Contracts" as pandora
+  database "IPFS" as ipfs
+end box
+
+box "Workers"
+  collections "Worker Nodes" as workers
+  control "Keras/TensorFlow" as nn
+  collections "Validating Nodes" as validators
+end box
+
+box "Arbiters"
+  collections "Arbiters" as arbiters
+end box
+
+entity "Cognition Contract" as cognition
+
+== Initial Appeal ==
+
+activate pandora
+activate workers
+
+pandora -[#blue]->> workers: failedResults
+
+alt Worker agrees
+  workers ->> pandora: accept
+  pandora -[#red]->x workers: penalty
+else Worker timeouts
+  pandora -[#red]->x workers: biggerPenalty
+else Worker appeals
+  workers ->> pandora: appeal
+  ref over pandora, arbiters: Closed Cognitive Arbitration Round
+end
+
+deactivate workers
+deactivate pandora
+@enduml
