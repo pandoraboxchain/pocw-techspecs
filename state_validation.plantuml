@@ -53,7 +53,7 @@ state "Validation" as validation {
   delivering --> [*]
 }
 
-state "Arbitration" as arbitration {
+state "Initial Appealing" as appealing {
   state "..." as more
 }
 
