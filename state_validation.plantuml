@@ -4,32 +4,58 @@ state "Data Check & Cognitive Work" as cognition {
 }
 
 state "Validation" as validation {
-  state "Lottery for validators" as lottery2
-  state "Gathering validators" as wait2
+  state "Lottery for validators" as lottery
+  state "Gathering validators" as wait
   state "Validating" as validating
-  state "Disclosing Veto" as disclosing1
-  state "Counting votes" as counting1
-  state "Killing validators" as killing1
-  state "Delivering results" as delivering1
+  state "Disclosing Veto" as disclosing
+  state "Counting votes" as counting
+  state "Fineing validators" as fineing
+  state "Delivering results" as delivering
 
-  cognition --> lottery2: all results\nare delivered
-  lottery2 --> wait2
-  lottery2 --> delivering1: not enough\nvalidators
-  wait2 --> lottery2: some validators\nrejected or\ntimed out
-  wait2 --> validating
-  wait2 --> delivering1: timeout\nlimit\nreached
-  validating --> lottery2: for timed out\nvalidators
-  validating --> disclosing1: all validators\nsumitted results
-  disclosing1 --> counting1: validators\nsubmitted keys
-  disclosing1 --> killing1: some validators\ntimed out
-  killing1 --> counting1
-  counting1 --> delivering1: no Faulty\nnodes
-  delivering1 --> [*]
+  lottery: – All validating nodes participate
+  lottery: – Chances are proportional to stake and reputation
+
+  wait: — Awaits congirmations from
+  wait:   all selected validtors
+  wait: – Timeout leads to penalty
+  wait:   and validator replacements
+
+  delivering: – Can have "partial validation" status
+  delivering: – In this case QA stake is partially repaid to the Client
+
+  validating: – Limited by time
+  validating: – Timeout initiates new
+  validating:   lottery to replace delayed
+  validating:   validators with a new ones
+  validating:   and leads to a fine
+
+  disclosing: – Limited by time
+  disclosing: – Timeout leads to fine
+  disclosing:   validators are not replaced
+
+  fineing: – Validators are fined
+  fineing:   loosing reputation and stakes
+
+  counting: – Defines True and Faulty Nodes
+
+  cognition --> lottery: all results\nare delivered
+  lottery --> wait
+  lottery --> delivering: not enough\nvalidators
+  wait --> lottery: some validators\nrejected or\ntimed out
+  wait --> validating: all validators\nresponded
+  wait --> delivering: timeout\nlimit\nreached
+  validating --> disclosing: all validators\nsumitted results
+  validating --> lottery: for timed out\nvalidators
+  disclosing --> counting: validators\nsubmitted keys
+  disclosing --> fineing: some validators\ntimed out
+  fineing --> counting
+  counting --> delivering: no Faulty\nnodes
+  delivering --> [*]
 }
 
 state "Arbitration" as arbitration {
   state "..." as more
 }
 
-counting1 --> more: Faulty nodes\nfound
+counting --> more: Faulty nodes\nfound
 @enduml
