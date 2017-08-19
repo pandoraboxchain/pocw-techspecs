@@ -1,0 +1,73 @@
+@startuml
+state "Data Check & Cognitive Work" as cognition {
+  state "..." as prev2
+
+  [*] --> prev2
+  prev2 --> [*]
+}
+
+state "Validation" as validation {
+  state "..." as prev
+  state "Delivering results, payouts & mining" as delivering
+
+  delivering: – Can have "partial validation" status
+  delivering: – In this case QA stake is partially repaid to the Client
+  delivering: – Payouts and cognitive mining
+
+  prev --> delivering: ...
+  delivering --> [*]
+}
+
+prev2 --> validation
+prev --> closed: initial appeal\nwas submitted
+
+state "Closed Arbitration" as closed {
+  state "..." as prev3
+}
+
+state "Public Arbitration" as public {
+  state "Gathering public arbiters" as gathering
+  state "Validating" as validating
+  state "Disclosing Veto" as disclosing
+  state "Counting votes" as counting
+  state "Killing Faulty nodes" as killing
+  state "Penalty to all participants" as killall
+
+  gathering: – All validator and 
+  gathering:   arbiter nodes 
+  gathering:   participate
+  gathering: – Requires quorum
+  gathering: – Has waiting timeout
+
+  validating: – Limited by time
+  validating: – Timeout leads to penalty,
+  validating:   partipants are not replaced
+
+  disclosing: – Limited by time
+  disclosing: – Timeout leads to penalty,
+  disclosing:   partipants are not replaced
+  disclosing: – Fineing timeout participants
+  disclosing:   from "validating" round
+
+  counting: – Requires > N votes for Veto
+  counting: – Fineing timeout participants
+  counting:   from "disclosing" round
+
+  killing: – Removing stakes/reputation from
+  killing:   the Nodes reported Faulty
+
+  killall: – Removing parts of stakes/reputation
+  killall:   from all nodes participating in
+  killall:   validation, closed and public arbitration
+
+  closed --> gathering: public appeal\nwas submitted
+  gathering --> validating: quorum reached
+  gathering --> delivering: quorum\nnot reached:\naccepting\nprevious\nVerdict
+  validating --> disclosing: quorum nodes\nsumitted results
+  disclosing --> counting: quorum nodes\nsubmitted keys
+  counting --> killall: Vertict is\nnot reached
+  counting --> killing: Verdict is\nreached
+  killall --> delivering
+  killing --> delivering
+}
+@enduml
