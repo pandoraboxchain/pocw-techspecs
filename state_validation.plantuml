@@ -1,6 +1,9 @@
 @startuml
 state "Data Check & Cognitive Work" as cognition {
   state "..." as prev
+
+  [*] --> prev
+  prev --> [*]
 }
 
 state "Validation" as validation {
@@ -12,7 +15,7 @@ state "Validation" as validation {
   state "Fineing validators" as fineing
   state "Waiting appeals" as waiting
   state "Killing workers" as killing
-  state "Delivering results" as delivering
+  state "Delivering results, payouts & mining" as delivering
 
   lottery: – All validating nodes participate
   lottery: – Chances are proportional to stake and reputation
@@ -24,6 +27,7 @@ state "Validation" as validation {
 
   delivering: – Can have "partial validation" status
   delivering: – In this case QA stake is partially repaid to the Client
+  delivering: – Payouts and cognitive mining
 
   validating: – Limited by time
   validating: – Timeout initiates new
@@ -46,7 +50,7 @@ state "Validation" as validation {
   killing: – Removing stakes/reputation from
   killing:   the Worker Nodes reported Faulty
 
-  cognition --> lottery: all results\nare delivered
+  prev --> lottery: all results\nare delivered
   lottery --> gathering
   lottery --> delivering: not enough\nvalidators
   gathering --> lottery: some validators\nrejected or\ntimed out
@@ -64,9 +68,16 @@ state "Validation" as validation {
   delivering --> [*]
 }
 
-state "Initial Appealing" as appealing {
-  state "..." as more
+state "Closed Arbitration" as closed {
+  state "..." as more1
 }
 
-waiting --> more: Appeals were submitted
+state "Public Arbitration" as public {
+  state "..." as more2
+}
+
+closed --> public
+waiting --> closed: appeal was submitted
+closed --> delivering: upon\narbitration\ncompletion
+public --> delivering: upon\narbitration\ncompletion
 @enduml
