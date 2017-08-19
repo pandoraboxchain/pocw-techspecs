@@ -40,8 +40,22 @@ state "Data Check & Cognitive Work" as cognition {
 }
 
 state "Validation" as validation {
-  state "..." as more
+  state "..." as more1
+
+  more1 --> [*]
+}
+
+state "Closed Arbitration" as closed {
+  state "..." as more2
+}
+
+state "Public Arbitration" as public {
+  state "..." as more3
 }
 
 work --> validation: all results\nare delivered
+more1 --> closed
+closed --> public
+closed -up-> more1
+public -up-> more1
 @enduml
