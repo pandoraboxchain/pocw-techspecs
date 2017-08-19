@@ -78,10 +78,11 @@ state "Closed Arbitration" as closed {
   killing --> delivering
 }
 
-state "Closed Arbitration" as arbitration {
+state "Public Arbitration" as public {
   state "..." as more
 }
 
-waiting --> arbitration: public appeal\nwas submitted
-counting --> arbitration: unanimous Verdict\nis not reached
+waiting --> public: public appeal\nwas submitted
+counting --> public: unanimous Verdict\nis not reached
+public --> delivering
 @enduml
