@@ -1,13 +1,87 @@
 @startuml
-state "Arbitration" as arbitration {
-  state "Accepting Initial Appeals" as iappeal
-  state "Gathering Arbiters" as wait3
-  state "Closed Arbitrage" as carbitrage
-  state "Revealing results" as revealing1
+state "Data Check & Cognitive Work" as cognition {
+  state "..." as prev2
 
-  counting1 --> iappeal: Faulty nodes\nfound
-  iappeal --> wait3
-  wait3 --> carbitrage
-  carbitrage --> revealing1
+  [*] --> prev2
+  prev2 --> [*]
 }
+
+state "Validation" as validation {
+  state "..." as prev
+  state "Delivering results, payouts & mining" as delivering
+
+  delivering: – Can have "partial validation" status
+  delivering: – In this case QA stake is partially repaid to the Client
+  delivering: – Payouts and cognitive mining
+
+  prev --> delivering: ...
+  delivering --> [*]
+}
+
+prev2 --> validation
+
+state "Closed Arbitration" as closed {
+  state "Lottery for arbiters" as lottery
+  state "Gathering arbiters" as gathering
+  state "Validating" as validating
+  state "Disclosing Veto" as disclosing
+  state "Counting votes" as counting
+  state "Fineing arbiters" as fineing
+  state "Waiting appeal" as waiting
+  state "Killing Faulty nodes" as killing
+
+  lottery: – All arbiter nodes participate
+  lottery: – Chances are proportional to stake and reputation
+
+  gathering: – Awaits congirmations from
+  gathering:   all selected arbiters
+  gathering: – Timeout leads to penalty
+  gathering:   and arbiter replacements
+
+  validating: – Limited by time
+  validating: – Timeout initiates new
+  validating:   lottery to replace delayed
+  validating:   arbiters with a new ones
+  validating:   and leads to a fine
+
+  disclosing: – Limited by time
+  disclosing: – Timeout leads to fine
+  disclosing:   arbiters are not replaced
+
+  fineing: – Arbiters are fined
+  fineing:   loosing reputation and stakes
+
+  counting: – Defines True and Faulty Nodes
+  counting: – Required 100% votes
+
+  waiting: – Wait for public appeals
+  waiting:   with some given timeout time
+  
+  killing: – Removing stakes/reputation from
+  killing:   the Nodes reported Faulty
+
+  validation --> lottery: initial appeal\nwas submitted
+  lottery --> gathering
+  lottery --> delivering: not enough\narbiters
+  gathering --> lottery: some arbiters\nrejected or\ntimed out
+  gathering --> validating: all arbiters\nresponded
+  gathering --> delivering: timeout\nlimit\nreached
+  validating --> disclosing: all arbiters\nsumitted results
+  validating --> lottery: for timed out\narbiters
+  validating --> validating: first\ntimeouts
+  disclosing --> counting: arbiters\nsubmitted keys
+  disclosing --> fineing: some arbiters\ntimed out
+  fineing --> counting
+  counting --> delivering: no Faulty\nnodes
+  counting --> waiting: Faulty nodes\nfound
+  waiting --> killing: No appeals\nwere submitted
+  killing --> delivering
+}
+
+state "Closed Arbitration" as arbitration {
+  state "..." as more
+}
+
+waiting --> arbitration: public appeal\nwas submitted
+counting --> arbitration: unanimous Verdict\nis not reached
 @enduml
