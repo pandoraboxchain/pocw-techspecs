@@ -4,7 +4,7 @@ skinparam packageStyle rectangle
 
 title Pandora Boxchain Data Entities Use Cases
 
-actor :Generic Provider: as GP
+actor :Data Provider: as GP
 actor :Kernel Provider: as KP
 actor :Dataset Provider: as DP
 
