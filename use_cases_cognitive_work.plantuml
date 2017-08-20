@@ -3,32 +3,34 @@ skinparam packageStyle rectangle
 
 title Pandora Boxchain Cognitive Work Use Cases
 
-actor :Generic Provider: as GP
+actor :Data Provider: as GP
 actor :Kernel Provider: as KP
 actor :Dataset Provider: as DP
 actor :Client: as C
-actor :Working Node: as WN
-actor :Validating Node Level 1: as VN1
-actor :Validating Node Level 2: as VN2
-actor :Data Entities Validators: as DEV
+actor :Worker Node: as WN
+actor :Validator Node: as VN1
+actor :Arbiter Node: as VN2
 
 KP <|-- GP: can be
 DP <|-- GP: can be
 
-VN1 <|- VN2: higher reputation
-DEV -|> VN1: "subset of VN1\nfrom data entities\nuse cases"
+VN1 <|-- VN2: higher reputation
 
 rectangle "Cognitive Computing" {
   usecase (Cognitive Computing) as cognition
-  usecase (Cognitive Arbitration) as cognitiveArbitration
+  usecase (Closed Arbitration) as closedArbitration
+  usecase (Public Arbitration) as publicArbitration
 
-  cognition .l.> cognitiveArbitration: extends
+  cognition ..> closedArbitration: extends
+  closedArbitration ..> publicArbitration: extends
   (cognition) -- C: "init &\npayes\nfor work"
   WN -- (cognition): "performs\ncognitive\ncomputations\n& mines"
-  WN -- (cognitiveArbitration): initialize
+  WN -- (closedArbitration): initial\nappeal
   VN1 -- (cognition): "validates\ncomputation\nresults"
-  VN2 -- (cognitiveArbitration): "arbitrates &\n get rewards\nor penalties"
-  (cognition) -- DEV: "gets % of\npaiments\nto Providers"
-  (cognition) --l-- GP: got paid
+  VN2 -- (closedArbitration): "arbitrates &\n get rewards\nor penalties"
+  (cognition) -- GP: got paid
+  VN1 -- (publicArbitration): "arbitrates &\n get rewards\nor penalties"
+  WN -- (publicArbitration): public\nappeal
+  VN1 -- (publicArbitration): public\nappeal
 }
 @enduml
