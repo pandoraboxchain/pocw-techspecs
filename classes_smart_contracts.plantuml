@@ -1,0 +1,43 @@
+@startuml
+interface ERC20 {
+}
+
+class PandoraRoot {
+  + address activeProtocol
+  + list<address> pastProtocols
+  + upgradeProtocol()
+  + downgradeProtocol()
+}
+
+class PandoraProtocol {
+}
+
+class GenericDataProvider {
+}
+
+class KernelProvider {
+}
+
+class DatasetProvider {
+}
+
+class CognitiveNode {
+}
+
+class CognitiveWork {
+}
+
+ERC20 <|-- PandoraRoot
+ERC20 <|-- PandoraProtocol
+PandoraRoot -- PandoraProtocol
+
+GenericDataProvider <|-up- KernelProvider
+GenericDataProvider <|-up- DatasetProvider
+PandoraProtocol "1" -- "many" KernelProvider
+PandoraProtocol "1" -- "many" DatasetProvider
+PandoraProtocol "1" -- "many" CognitiveNode
+PandoraProtocol "1" -- "many" CognitiveWork
+CognitiveWork "1" -up- "1" KernelProvider
+CognitiveWork "1" -up- "1" DatasetProvider
+CognitiveWork "1" -up- "many" CognitiveNode
+@enduml
