@@ -59,6 +59,7 @@ deactivate job
 
 pandora -> pandora: reduceStake(penalty)
 pandora -> failedContract: updateState(InssufficientStake) if neccessary
+pandora -> watcher: payReward()
 
 deactivate pandora
 
