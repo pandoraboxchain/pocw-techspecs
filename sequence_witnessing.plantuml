@@ -1,0 +1,75 @@
+@startuml
+box "Client"
+  actor "Client" as client
+  participant "dApp" as dapp
+end box
+
+box "Third party"
+  control "Watcher" as watcher
+end box
+
+box "Smart contracts"
+  entity "Pandora" as pandora << (C,#ADD1B2) >>
+  entity "Cognitive\nJob\nContract" as job << (C,#ADD1B2) >>
+  entity "Worker\nContracts" as workerContracts << (C,#ADD1B2) >>
+  entity "Failed\nWorker\nContract" as failedContract << (C,#ADD1B2) >>
+end box
+
+box "Nodes"
+  collections "Worker\nNodes" as workers
+  participant "Failed\nWorker" as failedWorker
+end box
+
+== Relations ==
+
+pandora --\\ job: 1 - to - many
+job --\\ workerContracts: 1 - to - many
+workerContracts //-- failedContract: one of
+
+workers --\\ workerContracts: owner
+failedWorker --\\ failedContract: owner
+
+== Witnessing ==
+
+activate job
+workers -> job: reportProgress()
+
+alt No internet connectivity
+  |||
+  failedWorker -->x failedContract
+  |||
+else Crash or turned off
+  |||
+  failedWorker -> failedWorker
+  destroy failedWorker
+  |||
+else Decided to keep silence
+  |||
+  failedWorker -->x]
+  |||
+end
+
+watcher -> job: reportWorkerFailure(failedWorker)
+job -> job: check timeout
+job -> failedContract: updateState(Offline)
+job -> job: replaceWorker()
+job -> pandora: penaltize(failedWorker)
+activate pandora
+deactivate job
+
+pandora -> pandora: reduceStake(penalty)
+pandora -> failedContract: updateState(InssufficientStake) if neccessary
+
+deactivate pandora
+
+== Restoring from failure ==
+
+activate failedWorker
+failedWorker -> failedContract: backOnline()
+activate failedContract
+deactivate failedWorker
+failedContract -> failedContract: updateState(Idle)
+deactivate failedContract
+
+|||
+@enduml
